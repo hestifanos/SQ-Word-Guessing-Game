@@ -1,62 +1,87 @@
 package org.example;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 
 public class WordGuessGame {
-    private static final List<String> WORDS = Arrays.asList("apple", "grape", "peach", "berry", "melon");
+    private static final List<String> WORDS = List.of("apple", "grape", "peach", "berry", "melon");
+    private static final int WORD_LENGTH = 5;
     static final int MAX_ATTEMPTS = 6;
-    private String targetWord;
-    public int attempts;
 
-    // Constructor to initialize the game with a random target word and reset attempts
+    private final String targetWord;
+    private int attempts;
+
     public WordGuessGame() {
-        Random random = new Random();
-        targetWord = WORDS.get(random.nextInt(WORDS.size()));
-        attempts = 0;
+        targetWord = WORDS.get(new Random().nextInt(WORDS.size()));
     }
 
-    // Constructor to initialize the game with a specific target word (for testing)
     public WordGuessGame(String targetWord) {
-        this.targetWord = targetWord;
-        attempts = 0;
+        this.targetWord = normalizeWord(targetWord);
     }
 
-
-    // Provides feedback on the guessed word
-    // Correct letter in correct position: the letter itself
-    // Correct letter in wrong position: '+'
-    // Incorrect letter: '-'
     public String getFeedback(String guess) {
-        StringBuilder feedback = new StringBuilder();
-        for (int i = 0; i < guess.length(); i++) {
-            if (guess.charAt(i) == targetWord.charAt(i)) {
-                feedback.append(guess.charAt(i));
-            } else if (targetWord.contains(String.valueOf(guess.charAt(i)))) {
-                feedback.append("+");
+        String normalizedGuess = normalizeWord(guess);
+        char[] feedback = new char[WORD_LENGTH];
+        int[] remainingLetters = new int[26];
+
+        for (int index = 0; index < WORD_LENGTH; index++) {
+            char targetLetter = targetWord.charAt(index);
+            char guessedLetter = normalizedGuess.charAt(index);
+            if (guessedLetter == targetLetter) {
+                feedback[index] = targetLetter;
             } else {
-                feedback.append("-");
+                remainingLetters[targetLetter - 'a']++;
             }
         }
-        return feedback.toString();
+
+        for (int index = 0; index < WORD_LENGTH; index++) {
+            if (feedback[index] != '\0') {
+                continue;
+            }
+
+            int letterIndex = normalizedGuess.charAt(index) - 'a';
+            if (remainingLetters[letterIndex] > 0) {
+                feedback[index] = '+';
+                remainingLetters[letterIndex]--;
+            } else {
+                feedback[index] = '-';
+            }
+        }
+
+        return new String(feedback);
     }
 
-    // Checks if the guessed word is correct
     public boolean isCorrectGuess(String guess) {
-        return guess.equals(targetWord);
+        return guess != null && guess.trim().toLowerCase(Locale.ROOT).equals(targetWord);
     }
 
-    // Checks if the player has attempts left
     public boolean hasAttemptsLeft() {
         return attempts < MAX_ATTEMPTS;
     }
 
-    // Increments the number of attempts made by the player
     public void incrementAttempts() {
         attempts++;
     }
 
-    // Returns the target word
+    public int getAttempts() {
+        return attempts;
+    }
+
     public String getTargetWord() {
         return targetWord;
+    }
+
+    private static String normalizeWord(String word) {
+        if (word == null) {
+            throw new IllegalArgumentException("Word must not be null.");
+        }
+
+        String normalizedWord = word.trim().toLowerCase(Locale.ROOT);
+        if (normalizedWord.length() != WORD_LENGTH
+                || !normalizedWord.chars().allMatch(character -> character >= 'a' && character <= 'z')) {
+            throw new IllegalArgumentException("Word must contain five letters from A to Z.");
+        }
+        return normalizedWord;
     }
 }

@@ -17,8 +17,8 @@ public class Main {
             System.out.print("Enter your guess: ");
             String guess = scanner.nextLine().toLowerCase();
 
-            if (guess.length() != 5) {
-                System.out.println("Please enter a 5-letter word.");
+            if (!guess.matches("[a-zA-Z]{5}")) {
+                System.out.println("Please enter a 5-letter word using A-Z.");
                 continue;
             }
 

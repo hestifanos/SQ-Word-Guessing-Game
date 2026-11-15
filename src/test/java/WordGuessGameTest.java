@@ -30,6 +30,16 @@ public class WordGuessGameTest {
         assertEquals("ap---", feedback);
     }
 
+    @Test
+    public void testFeedbackDoesNotCountDuplicateLettersMoreThanOnce() {
+        assertEquals("a+--e", game.getFeedback("allee"));
+    }
+
+    @Test
+    public void testRejectsGuessesWithInvalidLength() {
+        assertThrows(IllegalArgumentException.class, () -> game.getFeedback("app"));
+    }
+
     // Test for checking if the guessed word is correct
     @Test
     public void testIsCorrectGuess() {
@@ -52,9 +62,9 @@ public class WordGuessGameTest {
     // Test for incrementing the number of attempts
     @Test
     public void testIncrementAttempts() {
-        assertEquals(0, game.attempts);
+        assertEquals(0, game.getAttempts());
         game.incrementAttempts();
-        assertEquals(1, game.attempts);
+        assertEquals(1, game.getAttempts());
     }
 
 
